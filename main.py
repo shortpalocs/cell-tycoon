@@ -15,21 +15,31 @@ CLICK_MULTIPLIERS = {
     "Mitochondria": 2,
     "Ribosome": 4,
     "Vacuole": 8,
+    "Chloroplast": 5,
+    "Golgi Apparatus": 1
 }
 
 ATP_RATES = {
     "Mitochondria": 1,
     "Ribosome": 3,
     "Vacuole": 5,
+    "Chloroplast": 10,
+    "Golgi Apparatus": 0
 }
 
 
-
+ # python3 -m pygbag --build . && cp build/web/index.html . && cp build/web/codespaces-blank.apk . && cp build/web/codespaces-blank.tar.gz . && git add . && git commit -m "update game" && git push origin main
 def calc_atp_per_second(inventory):
     total = 0
     for name, count in inventory.items():
         total += ATP_RATES.get(name, 0) * count
-    return total
+
+    golgi_count = inventory.get("Golgi Apparatus", 0)
+    multiplier = 2 ** golgi_count
+
+
+
+    return total * multiplier
 
 def get_click_value(inventory):
     multiplier = 1
@@ -53,6 +63,8 @@ async def main():
 
 
     organelles = []
+
+
 
     while True:
         dt = clock.tick(60) / 1000.0
@@ -106,7 +118,7 @@ async def main():
                     for item, rect in item_rects:
                         if rect.collidepoint(event.pos):
                             if total_atp >= item["cost"]:
-                                total_atp -= item["cost"]
+                                total_atp -= (item["cost"])
                                 inventory[item["name"]] += 1
                                 message = f"Bought {item['name']}!"
                                 popup_organelle = item["name"]

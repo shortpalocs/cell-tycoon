@@ -1,25 +1,31 @@
 import pygame
 import random
-SHOP_ITEMS = [
-    {"name": "Mitochondria", "cost": 10, "desc": "+1 ATP/sec"},
-    {"name": "Ribosome",     "cost": 25, "desc": "+3 ATP/sec"},
-    {"name": "Vacuole",      "cost": 50, "desc": "+5 ATP/sec"},
-]
 
+SHOP_ITEMS = [
+    {"name": "Mitochondria", "cost": 25, "desc": "+1 ATP/sec"},
+    {"name": "Ribosome", "cost": 300, "desc": "+3 ATP/sec"},
+    {"name": "Vacuole", "cost": 800, "desc": "+5 ATP/sec"},
+    {"name": "Chloroplast", "cost": 2000, "desc": "+10 ATP/sec"},
+    {"name": "Golgi Apparatus", "cost": 50000, "desc": "Doubles all income."}
+]
 
 ORGANELLE_INFO = {
     "Mitochondria": "The powerhouse of the cell. Produces ATP for the cell via cellular respiration. He's why you're alive!",
-    "Ribosome":     "Tiny but mighty! Builds proteins from amino acids. Also helps with protein synthesis.",
-    "Vacuole":      "Storage unit of the cell. Holds water, nutrients, and waste."
+    "Ribosome": "Tiny but mighty! Builds proteins from amino acids. Also helps with protein synthesis.",
+    "Vacuole": "Storage unit of the cell. Holds water, nutrients, and waste.",
+    "Chloroplast": "Converts sunlight energy, carbon dioxide, and water into glucose for the cell.",
+    "Golgi Apparatus": "Modifies, sorts, and packages proteins and lipids received from the endoplasmic reticulum (ER) into vesicles."
+
 }
 # use for drawing later
 ORGANELLE_VISUALS = {
     "Mitochondria": {"color": (220, 80, 80), "shape": "oval"},
     "Ribosome": {"color": (80, 80, 220), "shape": "circle"},
-    "Vacuole": {"color": (80, 200, 120), "shape": "rect"},
+    "Vacuole": {"color": (11, 217, 224), "shape": "rect"},
+    "Chloroplast": {"color": (12, 245, 74), "shape": "oval"},
+    "Golgi Apparatus": {"color": (255, 0, 115), "shape": "pancakes"}
 
 }
-
 
 
 def showI(screen, font):
@@ -35,8 +41,6 @@ def showI(screen, font):
     screen.blit(instruction_surface, (box_x + 100, box_y + 200))
 
 
-
-
 def draw_organelles(screen, organelles):
     for o in organelles:
         x, y = o["pos"]
@@ -45,17 +49,17 @@ def draw_organelles(screen, organelles):
 
         if shape == "oval":
             pygame.draw.ellipse(screen, color, [x, y, 40, 22])
-            pygame.draw.ellipse(screen, (245,149,66), [x,y,40,22], 0)
         if shape == "circle":
             pygame.draw.circle(screen, (255, 255, 255), (x + 7, y + 7), 2)
         if shape == "rect":
             # vacoule
-            rect_coords = [x,y,45,35]
+            rect_coords = [x, y, 45, 35]
             pygame.draw.rect(screen, color, rect_coords, border_radius=5)
             pygame.draw.rect(screen, (255, 255, 255), [x + 5, y + 5, 10, 5], border_radius=2)
 
-
-
+        if shape == "pancakes":
+            for i in range(4):
+                pygame.draw.ellipse(screen, color, [x + (i * 2), y + (i * 10), 60, 15])
 
 
 def draw_popup(screen, font, organelle_name):
@@ -72,7 +76,6 @@ def draw_popup(screen, font, organelle_name):
     title = font.render(organelle_name, True, (0, 0, 100))
     screen.blit(title, (panel_x + 10, panel_y + 10))
 
-
     words = info.split()
     line, lines = "", []
     for word in words:
@@ -88,7 +91,7 @@ def draw_popup(screen, font, organelle_name):
         screen.blit(text, (panel_x + 10, panel_y + 45 + j * 20))
 
 
-
+# scrap this idea tbh
 
 
 
@@ -126,7 +129,6 @@ def draw_shop_panel(screen, font, inventory, total_atp):
         pygame.draw.rect(screen, color, btn_rect, border_radius=6)
         pygame.draw.rect(screen, (0, 0, 0), btn_rect, 2, border_radius=6)
 
-        # Name
         name_surf = font.render(item["name"], True, (0, 0, 0))
         screen.blit(name_surf, (shop_x + 15, item_y + 5))
 
@@ -141,6 +143,7 @@ def draw_shop_panel(screen, font, inventory, total_atp):
         item_rects.append((item, btn_rect))
 
     return item_rects
+
 
 def draw_inventory(screen, font, inventory):
     small_font = pygame.font.Font(pygame.font.get_default_font(), 16)
