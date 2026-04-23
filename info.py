@@ -6,8 +6,8 @@ SHOP_ITEMS = [
     {"name": "Mitochondria", "cost": 25, "desc": "+1 ATP/sec"},
     {"name": "Ribosome", "cost": 50, "desc": "+3 ATP/sec"},
     {"name": "Vacuole", "cost": 75, "desc": "+5 ATP/sec"},
-    {"name": "Chloroplast", "cost": 1, "desc": "+10 ATP/sec"},
-    {"name": "Golgi Apparatus", "cost": 1, "desc": "Doubles all income."}
+    {"name": "Chloroplast", "cost": 500, "desc": "+10 ATP/sec"},
+    {"name": "Golgi Apparatus", "cost": 10000, "desc": "Doubles all income."}
 ]
 
 ORGANELLE_INFO = {
