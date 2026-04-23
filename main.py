@@ -1,6 +1,8 @@
 import sys, pygame
-from info import showI, draw_shop_button, draw_shop_panel, draw_inventory, draw_popup, SHOP_ITEMS, draw_organelles
+from info import showI, draw_shop_button, draw_shop_panel, draw_inventory, draw_popup, SHOP_ITEMS, draw_organelles, \
+    get_safe_pos
 import asyncio
+import math
 import random
 pygame.init()
 size = width, height = 800, 600
@@ -69,6 +71,7 @@ async def main():
     while True:
         dt = clock.tick(60) / 1000.0
         screen.fill(AQUA)
+        draw_organelles(screen, organelles)
 
         if showinfo:
             showI(screen, font)
@@ -125,9 +128,8 @@ async def main():
                                 popup_timer = 300
 
                                 # add to screen
-                                rx = random.randint(50, 550) # avoid shop panel
-                                ry = random.randint(80, 520)
-                                organelles.append({"name": item["name"], "pos": (rx,ry)})
+                                pos = get_safe_pos()
+                                organelles.append({"name": item["name"], "pos": pos})
 
                             else:
                                 message = f"Not enough ATP for {item['name']}!"
@@ -140,7 +142,7 @@ async def main():
 
 
 
-        draw_organelles(screen, organelles)
+
         pygame.display.flip()
         await asyncio.sleep(0)
 

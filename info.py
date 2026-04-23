@@ -1,12 +1,13 @@
 import pygame
 import random
+import math
 
 SHOP_ITEMS = [
     {"name": "Mitochondria", "cost": 25, "desc": "+1 ATP/sec"},
-    {"name": "Ribosome", "cost": 50, "desc": "+8 ATP/sec"},
-    {"name": "Vacuole", "cost": 800, "desc": "+40 ATP/sec"},
-    {"name": "Chloroplast", "cost": 2000, "desc": "+300 ATP/sec"},
-    {"name": "Golgi Apparatus", "cost": 50000, "desc": "Doubles all income."}
+    {"name": "Ribosome", "cost": 50, "desc": "+3 ATP/sec"},
+    {"name": "Vacuole", "cost": 75, "desc": "+5 ATP/sec"},
+    {"name": "Chloroplast", "cost": 1, "desc": "+10 ATP/sec"},
+    {"name": "Golgi Apparatus", "cost": 1, "desc": "Doubles all income."}
 ]
 
 ORGANELLE_INFO = {
@@ -42,24 +43,80 @@ def showI(screen, font):
 
 
 def draw_organelles(screen, organelles):
+    # unique pulse depending on time
+    time_ms = pygame.time.get_ticks()
+    pulse_offset = math.sin(time_ms / 500) * 8  # Goes smoothly from -8 to +8
+
     for o in organelles:
         x, y = o["pos"]
-        color = ORGANELLE_VISUALS[o["name"]]["color"]
-        shape = ORGANELLE_VISUALS[o["name"]]["shape"]
+        visual = ORGANELLE_VISUALS.get(o["name"])
+        if not visual: continue  # Safety check
 
-        if shape == "oval":
-            pygame.draw.ellipse(screen, color, [x, y, 40, 22])
-        if shape == "circle":
-            pygame.draw.circle(screen, (255, 255, 255), (x + 7, y + 7), 2)
-        if shape == "rect":
-            # vacoule
+        color = visual["color"]
+        shape = visual["shape"]
+
+        if shape == "oval" and o["name"] == "Mitochondria":
+            flicker = math.sin(time_ms / 100) * 40
+            glow_color = (min(255, color[0] + flicker), color[1], color[2])
+
+            pygame.draw.ellipse(screen, glow_color, [x, y, 40, 22])
+            # zig zag line inside
+            pygame.draw.lines(screen, (255, 255, 255), False,
+                              [(x + 5, y + 11), (x + 15, y + 5), (x + 25, y + 17), (x + 35, y + 11)], 2)
+
+        if shape == "oval" and o["name"] == "Chloroplast":
+            # shimmer effect
+            shimmer = math.sin(time_ms / 600) * 50
+            leaf_color = (color[0], min(255, color[1] + int(shimmer)), color[2])
+            pygame.draw.ellipse(screen, leaf_color, [x, y, 40, 22])
+            for i in range(3):
+                pygame.draw.rect(screen, (0, 100, 0), [x + 10 + (i * 10), y + 6, 4, 10])
+
+        elif shape == "circle":
+
+            # jitter
+            jx = random.randint(-1,1)
+            jy = random.randint(-1,1)
+            pygame.draw.circle(screen, color, (x+ 7 + jx, y + 7 + jy), 5)
+            if math.sin(time_ms / 200) > 0.8:
+                pygame.draw.circle(screen, (255,255,255), (x + 15, y - 5), 3)
+
+
+        elif shape == "rect":
             rect_coords = [x, y, 45, 35]
             pygame.draw.rect(screen, color, rect_coords, border_radius=5)
-            pygame.draw.rect(screen, (255, 255, 255), [x + 5, y + 5, 10, 5], border_radius=2)
+            # vacoule water highlight
+            sway = math.sin(time_ms / 1000) * 3
+            pygame.draw.rect(screen, (255, 255, 255, 100), [x + 5 + sway, y + 5, 15, 5], border_radius=2)
 
-        if shape == "pancakes":
-            for i in range(4):
-                pygame.draw.ellipse(screen, color, [x + (i * 2), y + (i * 10), 60, 15])
+        elif shape == "pancakes":
+            # ANIMATION
+            for i in range(5):
+
+                layer_offset_x = (i * 2)
+                layer_offset_y = (i * 8)
+
+                # apply the pulse_offset to the width and x-position of each layer
+                width = 60 + pulse_offset
+                current_x = (x + layer_offset_x) - (pulse_offset / 2)  # keep centered
+
+
+                shade = max(0, min(255, int(150 + (i * 20))))  # simple shading
+                layer_color = (shade, 0, 80)  # darker version of magenta for depth
+
+                pygame.draw.ellipse(screen, layer_color, [current_x, y + layer_offset_y, width, 15])
+                pygame.draw.ellipse(screen, color, [current_x, y + layer_offset_y, width, 15], 2)
+
+
+def get_safe_pos():
+    while True:
+        rx = random.randint(200, 540)
+        ry = random.randint(80, 450)
+
+
+        dist = math.sqrt((rx - 350) ** 2 + (ry - 300) ** 2)
+        if dist > 90:  # If it's at least 70px away from the center
+            return (rx, ry)
 
 
 def draw_popup(screen, font, organelle_name):
@@ -92,6 +149,8 @@ def draw_popup(screen, font, organelle_name):
 
 
 # scrap this idea tbh
+def calc_new_price():
+    pass
 
 
 
@@ -123,7 +182,7 @@ def draw_shop_panel(screen, font, inventory, total_atp):
         count = inventory.get(item["name"], 0)
         can_afford = total_atp >= item["cost"]
 
-        # Button background: grey out if can't afford
+        # gray out if cant afford
         color = (200, 230, 200) if can_afford else (200, 200, 200)
         btn_rect = pygame.Rect(shop_x + 10, item_y, 188, 75)
         pygame.draw.rect(screen, color, btn_rect, border_radius=6)
@@ -132,11 +191,11 @@ def draw_shop_panel(screen, font, inventory, total_atp):
         name_surf = font.render(item["name"], True, (0, 0, 0))
         screen.blit(name_surf, (shop_x + 15, item_y + 5))
 
-        # Cost + description
+        # cost + description
         cost_surf = small_font.render(f"Cost: {item['cost']} ATP  {item['desc']}", True, (60, 60, 60))
         screen.blit(cost_surf, (shop_x + 15, item_y + 35))
 
-        # Owned count
+        # owned count
         owned_surf = small_font.render(f"Owned: {count}", True, (0, 100, 0))
         screen.blit(owned_surf, (shop_x + 15, item_y + 53))
 
