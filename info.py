@@ -3,9 +3,9 @@ import random
 
 SHOP_ITEMS = [
     {"name": "Mitochondria", "cost": 25, "desc": "+1 ATP/sec"},
-    {"name": "Ribosome", "cost": 300, "desc": "+3 ATP/sec"},
-    {"name": "Vacuole", "cost": 800, "desc": "+5 ATP/sec"},
-    {"name": "Chloroplast", "cost": 2000, "desc": "+10 ATP/sec"},
+    {"name": "Ribosome", "cost": 50, "desc": "+8 ATP/sec"},
+    {"name": "Vacuole", "cost": 800, "desc": "+40 ATP/sec"},
+    {"name": "Chloroplast", "cost": 2000, "desc": "+300 ATP/sec"},
     {"name": "Golgi Apparatus", "cost": 50000, "desc": "Doubles all income."}
 ]
 
