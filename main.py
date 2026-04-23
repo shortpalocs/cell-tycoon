@@ -20,9 +20,9 @@ CLICK_MULTIPLIERS = {
 }
 
 ATP_RATES = {
-    "Mitochondria": 1,
+    "Mitochondria": 2,
     "Ribosome": 15,
-    "Vacuole": 5,
+    "Vacuole": 40,
     "Chloroplast": 10,
     "Golgi Apparatus": 0
 }
